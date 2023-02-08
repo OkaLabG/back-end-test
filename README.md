@@ -1,45 +1,34 @@
-# Teste para candidatos à vaga de desenvolvedor Back-end
+# Teste Técnico Desenvolvedor(a) Back End Júnior
 
-### Instruções
+## Problema
 
-1. Desenvolver um CRUD completo para o cadastro de um usuário;
+A DevSys é uma empresa de tecnologia, nela se encontram vários colaboradores de diferentes setores. O setor administrativo, juntamente com o RH, necessitam de uma ferramenta que possa organizar e gerenciar as férias dos colaboradores da empresa.
 
-2. Nós queremos avaliar o seu nível de conhecimento sobre estrutura de dados e organização do projeto. Utilize o framework em que possui familiaridade para o desenvolvimento;
+## Solução
 
-3. Por ser um método CRUD, é necessário a criação de um método POST, GET, PUT e DELETE;
+Para ajudar o setor administrativo, você deve desenvolver uma API REST onde o time de Front-end possa produzir uma interface dispondo todas as informações necessárias para organizar as férias dos funcionários.
 
-4. Entidade Users deve conter, id, nome completo, idade, email, telefone e password (caso for realizar autenticação).
+### Algumas orientações para o funcionamento da regra de negócio
 
-5. Não tenha pressa! Iremos avaliar a qualidade do seu código, mesmo incompleto e principalmente a sua semântica;
+1. Cada setor da empresa possui no mínimo um colaborador responsável (Coordenador, gerente, etc) por toda a equipe.
+2. Nenhum setor pode ficar sem um responsável nas férias de alguém.
+3. Nenhum setor pode realizar férias coletivas (Todos do setor).
+4. Sempre deve haver mão de obra disponível em todos os setores, contendo pelo menos 2 pessoas disponíveis (contando com o responsável).
 
-### O que esperamos:
+## Recomendações
 
-1. Utilizar Node.JS;
-
-2. Utilizar ECMAScript 6+;
-
-3. Criar um passo a passo de como rodar sua aplicação;
-
-### Plus:
-
-1. Criar uma rota de login para os usuário cadastrados;
-
-2. Realizar autenticação das rotas;
-
-3. Utilizar TypeScript;
-
-4. Utilização de Docker;
-
-5. Criar um Swagger.
+- Utilizar o framework [Nest.js](https://docs.nestjs.com/).
+- Usar o [Redis](https://redis.io/) como complemento da aplicação.
+- Usar o [Docker](https://docs.docker.com/) e implementar o Docker Compose na aplicação.
+- Utilizar [MongoDB](https://www.mongodb.com) como seu banco principal.
+- ORM será o [TypeOrm](https://typeorm.io/) para o app.
+- Utilizar um serviço de e-mail para enviar relatórios e notificações para os colaboradores e para o setor administrativo.
+- Realizar testes automatizados nas principais rotas ([Jest](https://jestjs.io/pt-BR/)).
 
 ### Atenção
-
-- É permitido usar qualquer editor de código e consultar a internet.
 
 Ao terminar o teste, solicite um pull request.
 
 Em caso de dúvidas, envie e-mail para reinaldo@imobpower.com.
 
 **Boa sorte!**
-
-teste
