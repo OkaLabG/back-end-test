@@ -1,34 +1,73 @@
-# Teste Técnico Desenvolvedor(a) Back End Júnior
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+</p>
 
-## Problema
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-A DevSys é uma empresa de tecnologia, nela se encontram vários colaboradores de diferentes setores. O setor administrativo, juntamente com o RH, necessitam de uma ferramenta que possa organizar e gerenciar as férias dos colaboradores da empresa.
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Solução
+## Description
 
-Para ajudar o setor administrativo, você deve desenvolver uma API REST onde o time de Front-end possa produzir uma interface dispondo todas as informações necessárias para organizar as férias dos funcionários.
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-### Algumas orientações para o funcionamento da regra de negócio
+## Installation
 
-1. Cada setor da empresa possui no mínimo um colaborador responsável (Coordenador, gerente, etc) por toda a equipe.
-2. Nenhum setor pode ficar sem um responsável nas férias de alguém.
-3. Nenhum setor pode realizar férias coletivas (Todos do setor).
-4. Sempre deve haver mão de obra disponível em todos os setores, contendo pelo menos 2 pessoas disponíveis (contando com o responsável).
+```bash
+$ npm install
+```
 
-## Recomendações
+## Running the app
 
-- Utilizar o framework [Nest.js](https://docs.nestjs.com/).
-- Usar o [Redis](https://redis.io/) como complemento da aplicação.
-- Usar o [Docker](https://docs.docker.com/) e implementar o Docker Compose na aplicação.
-- Utilizar [MongoDB](https://www.mongodb.com) como seu banco principal.
-- ORM será o [TypeOrm](https://typeorm.io/) para o app.
-- Utilizar um serviço de e-mail para enviar relatórios e notificações para os colaboradores e para o setor administrativo.
-- Realizar testes automatizados nas principais rotas ([Jest](https://jestjs.io/pt-BR/)).
+```bash
+# development
+$ npm run start
 
-### Atenção
+# watch mode
+$ npm run start:dev
 
-Ao terminar o teste, solicite um pull request.
+# production mode
+$ npm run start:prod
+```
 
-Em caso de dúvidas, envie e-mail para reinaldo@imobpower.com.
+## Test
 
-**Boa sorte!**
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](LICENSE).
