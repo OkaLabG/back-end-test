@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Department } from './entities/department.entity';
 import { ObjectId } from 'mongodb';
+import { AppResponse } from 'src/helpers/Response';
 
 @Injectable()
 export class DepartmentsService {
@@ -22,18 +23,34 @@ export class DepartmentsService {
       }),
     );
 
-    return department;
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on create department',
+      data: department,
+    });
   }
 
   async findAll() {
-    return this.departmentRepository.find();
+    const departments = await this.departmentRepository.find();
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on list all departments',
+      data: departments,
+    });
   }
 
   async findOne(id: string) {
-    return this.departmentRepository.findOne({
+    const department = await this.departmentRepository.findOne({
       where: {
         _id: new ObjectId(id),
       },
+    });
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on list this department',
+      data: department,
     });
   }
 
@@ -41,19 +58,31 @@ export class DepartmentsService {
     try {
       await this.departmentRepository.update(id, updateDepartmentDto);
     } catch (err) {
-      return new BadRequestException('Error on update this department');
+      return new AppResponse({
+        result: 'error',
+        message: 'Error on update this department',
+      });
     }
 
-    return { message: 'Success on update department' };
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on update this department',
+    });
   }
 
   async remove(id: string) {
     try {
       await this.departmentRepository.delete(id);
     } catch (err) {
-      return new BadRequestException('Error on update this department');
+      return new AppResponse({
+        result: 'error',
+        message: 'Error on delete this department',
+      });
     }
 
-    return { message: 'Success on update department' };
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on delete this department',
+    });
   }
 }

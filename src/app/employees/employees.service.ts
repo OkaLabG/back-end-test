@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { DepartmentsService } from 'src/app/departments/departments.service';
+import { AppResponse } from 'src/helpers/Response';
 import { Repository } from 'typeorm';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -47,34 +48,62 @@ export class EmployeesService {
       }),
     );
 
-    return employee;
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on create employee',
+      data: employee,
+    });
   }
 
   async findAll() {
-    return this.employeeRepository.find();
+    const employees = await this.employeeRepository.find();
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on list all employees',
+      data: employees,
+    });
   }
 
   async findOne(id: string) {
-    return this.employeeRepository.findOne({
+    const employee = await this.employeeRepository.findOne({
       where: {
         _id: new ObjectId(id),
       },
     });
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on list this employees',
+      data: employee,
+    });
   }
 
   async findAllByDepartment(departmentId: string) {
-    return this.employeeRepository.find({
+    const employees = await this.employeeRepository.find({
       where: {
         departmentId: departmentId,
       },
     });
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on list all employees for this department',
+      data: employees,
+    });
   }
 
   async findByEmail(email: string) {
-    return this.employeeRepository.findOne({
+    const employee = await this.employeeRepository.findOne({
       where: {
         email: email,
       },
+    });
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on list this employee for this email',
+      data: employee,
     });
   }
 
@@ -98,24 +127,36 @@ export class EmployeesService {
     try {
       await this.employeeRepository.delete(id);
     } catch (err) {
-      return new BadRequestException('Error on update this employee');
+      return new AppResponse({
+        result: 'success',
+        message: 'Error on update this employee',
+      });
     }
 
-    return { message: 'Success on delete employee' };
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on delete employee',
+    });
   }
 
   async updateVacation(id: string, status: boolean) {
-    const employee = await this.findOne(id);
+    const { data: employee } = await this.findOne(id);
 
     if (!employee) {
-      return new BadRequestException('Employee does no exists');
+      return new AppResponse({
+        result: 'error',
+        message: 'Employee does no exists',
+      });
     }
 
     if (employee.onVacation && status) {
-      return new BadRequestException('Employee is in vacation');
+      return new AppResponse({
+        result: 'error',
+        message: 'Employee is in vacation',
+      });
     }
 
-    const departmentsVacations = await this.findAllByDepartment(
+    const { data: departmentsVacations } = await this.findAllByDepartment(
       employee.departmentId,
     );
 
@@ -124,18 +165,20 @@ export class EmployeesService {
     );
 
     if (employeesInWork.length <= 2 && status) {
-      return new BadRequestException(
-        'Exceeded number of employees on vacation',
-      );
+      return new AppResponse({
+        result: 'error',
+        message: 'Exceeded number of employees on vacation',
+      });
     }
 
     if (employee.isManager) {
       const managers = employeesInWork.filter((row) => row.isManager);
 
       if (managers.length <= 1 && status) {
-        return new BadRequestException(
-          'Exceeded number of managers on vacation',
-        );
+        return new AppResponse({
+          result: 'error',
+          message: 'Exceeded number of managers on vacation',
+        });
       }
     }
 
@@ -144,9 +187,14 @@ export class EmployeesService {
         onVacation: status,
       });
     } catch (err) {
-      return new BadRequestException('Error on update this vacation');
+      return new AppResponse({
+        result: 'error',
+        message: 'Error on update this vacation',
+      });
     }
-
-    return { message: 'Success on update vacation' };
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on update vacation',
+    });
   }
 }

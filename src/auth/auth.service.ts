@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compareSync } from 'bcrypt';
+import { compareSync } from 'bcryptjs';
 import { User } from 'src/app/users/entities/user.entity';
 import { UsersService } from 'src/app/users/users.service';
+import { AppResponse } from 'src/helpers/Response';
 
 @Injectable()
 export class AuthService {
@@ -14,16 +15,20 @@ export class AuthService {
   async session(user: User) {
     const payload = { sub: user._id, email: user.email };
 
-    return {
-      token: this.jwtService.sign(payload),
-    };
+    return new AppResponse({
+      result: 'success',
+      message: 'Success on create session',
+      data: { token: this.jwtService.sign(payload) },
+    });
   }
 
   async validateUser(email: string, password: string) {
     let user: User;
 
     try {
-      user = await this.userService.findByEmail(email);
+      const { data } = await this.userService.findByEmail(email);
+
+      user = data;
     } catch (err) {
       return null;
     }
