@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('employees')
+@UseGuards(AuthGuard('jwt'))
 export class EmployeesController {
   constructor(
     @Inject(EmployeesService)
