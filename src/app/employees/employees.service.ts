@@ -1,6 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId } from 'mongodb';
 import { DepartmentsService } from 'src/app/departments/departments.service';
 import { AppResponse } from 'src/helpers/Response';
 import { Repository } from 'typeorm';
@@ -68,7 +67,7 @@ export class EmployeesService {
   async findOne(id: string) {
     const employee = await this.employeeRepository.findOne({
       where: {
-        _id: new ObjectId(id),
+        _id: id,
       },
     });
 

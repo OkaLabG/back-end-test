@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AppResponse } from 'src/helpers/Response';
 import { Repository } from 'typeorm';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Department } from './entities/department.entity';
-import { ObjectId } from 'mongodb';
-import { AppResponse } from 'src/helpers/Response';
 
 @Injectable()
 export class DepartmentsService {
@@ -43,7 +42,7 @@ export class DepartmentsService {
   async findOne(id: string) {
     const department = await this.departmentRepository.findOne({
       where: {
-        _id: new ObjectId(id),
+        _id: id,
       },
     });
 

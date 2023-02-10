@@ -1,17 +1,17 @@
+import { hashSync } from 'bcryptjs';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  ObjectID,
   ObjectIdColumn,
 } from 'typeorm';
-import { hashSync } from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class User {
   @ObjectIdColumn()
-  _id: ObjectID;
+  _id: string;
 
   @Column()
   name: string;
@@ -28,5 +28,11 @@ export class User {
   @BeforeInsert()
   hashPassword() {
     this.password = hashSync(this.password, 10);
+  }
+
+  constructor() {
+    if (!this._id) {
+      this._id = uuidv4();
+    }
   }
 }
