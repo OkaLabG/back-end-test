@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectID, Repository } from 'typeorm';
+import { FindOneOptions, ObjectID, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -26,6 +26,14 @@ export class UsersService {
 
   async findAll() {
     return this.usersRepository.find();
+  }
+
+  async findByEmail(email: string) {
+    return this.usersRepository.findOne({
+      where: {
+        email,
+      },
+    });
   }
 
   async findOne(id: string) {
