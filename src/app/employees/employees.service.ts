@@ -19,19 +19,23 @@ export class EmployeesService {
   async create({ email, isManager, name, departmentId }: CreateEmployeeDto) {
     const newEmployee = new Employee();
 
-    const employeeExists = await this.findByEmail(email);
+    const { data: employeeExists } = await this.findByEmail(email);
 
     if (employeeExists) {
       return new BadRequestException('Employee already exists');
     }
 
-    const departmentExists = await this.departmentService.findOne(departmentId);
+    const { data: departmentExists } = await this.departmentService.findOne(
+      departmentId,
+    );
 
     if (!departmentExists) {
       return new BadRequestException('Department does not exists');
     }
 
-    const departmentHasManager = await this.findAllByDepartment(departmentId);
+    const { data: departmentHasManager } = await this.findAllByDepartment(
+      departmentId,
+    );
 
     if (!departmentHasManager && !isManager) {
       return new BadRequestException('Department has no manager');
@@ -186,6 +190,8 @@ export class EmployeesService {
         onVacation: status,
       });
     } catch (err) {
+      console.log({ err });
+
       return new AppResponse({
         result: 'error',
         message: 'Error on update this vacation',

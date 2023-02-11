@@ -1,16 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppResponse } from 'src/helpers/Response';
+import { SendMailProducerService } from './jobs/sendMail-producer.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { EmployeesService } from '../employees/employees.service';
+import { DepartmentsService } from '../departments/departments.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private sendMailProducerService: SendMailProducerService,
+    @Inject(EmployeesService)
+    private employeesService: EmployeesService,
+    @Inject(DepartmentsService)
+    private departmentsService: DepartmentsService,
   ) {}
 
   async create({ email, name, password }: CreateUserDto) {
@@ -66,6 +74,29 @@ export class UsersService {
       result: 'success',
       message: 'Success on list this user',
       data: user,
+    });
+  }
+
+  async vacationReport(userId: string, departmentId?: string) {
+    const user = await this.usersRepository.findOne({
+      where: {
+        _id: userId,
+      },
+    });
+
+    const { data: employees } = await this.employeesService.findAllByDepartment(
+      departmentId,
+    );
+
+    const { data: department } = await this.departmentsService.findOne(
+      departmentId,
+    );
+
+    this.sendMailProducerService.sendMail(user, employees, department);
+
+    return new AppResponse({
+      result: 'success',
+      message: 'Vacations report sended to email',
     });
   }
 
