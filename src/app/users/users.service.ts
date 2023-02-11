@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { EmployeesService } from '../employees/employees.service';
 import { DepartmentsService } from '../departments/departments.service';
+import { AppError } from 'src/helpers/Error';
 
 @Injectable()
 export class UsersService {
@@ -24,13 +25,37 @@ export class UsersService {
   async create({ email, name, password }: CreateUserDto) {
     const newUser = new User();
 
-    const user = await this.usersRepository.save(
-      Object.assign(newUser, {
+    const userExists = await this.usersRepository.findOne({
+      where: {
         email,
-        name,
-        password,
-      }),
-    );
+      },
+    });
+
+    if (userExists) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User already exists',
+      });
+    }
+
+    let user: User;
+
+    try {
+      user = await this.usersRepository.save(
+        Object.assign(newUser, {
+          email,
+          name,
+          password,
+        }),
+      );
+    } catch (err) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Error on create this user',
+      });
+    }
 
     return new AppResponse({
       result: 'success',
@@ -41,6 +66,14 @@ export class UsersService {
 
   async findAll() {
     const users = await this.usersRepository.find();
+
+    if (!users.length) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User not found',
+      });
+    }
 
     return new AppResponse({
       result: 'success',
@@ -56,6 +89,14 @@ export class UsersService {
       },
     });
 
+    if (!user) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User not found',
+      });
+    }
+
     return new AppResponse({
       result: 'success',
       message: 'Success on list this user for this email',
@@ -69,6 +110,14 @@ export class UsersService {
         _id: id,
       },
     });
+
+    if (!user) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User not found',
+      });
+    }
 
     return new AppResponse({
       result: 'success',
@@ -84,13 +133,37 @@ export class UsersService {
       },
     });
 
-    const { data: employees } = await this.employeesService.findAllByDepartment(
-      departmentId,
-    );
+    if (!user) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User not found',
+      });
+    }
 
     const { data: department } = await this.departmentsService.findOne(
       departmentId,
     );
+
+    if (!department) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Department not found',
+      });
+    }
+
+    const { data: employees } = await this.employeesService.findAllByDepartment(
+      departmentId,
+    );
+
+    if (employees.length) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employees not found',
+      });
+    }
 
     this.sendMailProducerService.sendMail(user, employees, department);
 
@@ -104,8 +177,9 @@ export class UsersService {
     try {
       await this.usersRepository.update(id, { email, name });
     } catch (err) {
-      return new AppResponse({
+      throw new AppError({
         result: 'error',
+        statusCode: 400,
         message: 'Error on update this user',
       });
     }
@@ -120,8 +194,9 @@ export class UsersService {
     try {
       await this.usersRepository.delete(id);
     } catch (err) {
-      return new AppResponse({
+      throw new AppError({
         result: 'error',
+        statusCode: 400,
         message: 'Error on delete this user',
       });
     }

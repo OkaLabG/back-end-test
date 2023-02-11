@@ -1,6 +1,7 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DepartmentsService } from 'src/app/departments/departments.service';
+import { AppError } from 'src/helpers/Error';
 import { AppResponse } from 'src/helpers/Response';
 import { Repository } from 'typeorm';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -19,10 +20,16 @@ export class EmployeesService {
   async create({ email, isManager, name, departmentId }: CreateEmployeeDto) {
     const newEmployee = new Employee();
 
-    const { data: employeeExists } = await this.findByEmail(email);
+    const employeeExists = await this.employeeRepository.findOne({
+      where: { email },
+    });
 
     if (employeeExists) {
-      return new BadRequestException('Employee already exists');
+      throw new AppError({
+        statusCode: 400,
+        result: 'error',
+        message: 'Employee already exists',
+      });
     }
 
     const { data: departmentExists } = await this.departmentService.findOne(
@@ -30,7 +37,11 @@ export class EmployeesService {
     );
 
     if (!departmentExists) {
-      return new BadRequestException('Department does not exists');
+      throw new AppError({
+        statusCode: 400,
+        result: 'error',
+        message: 'Department does not exists',
+      });
     }
 
     const { data: departmentHasManager } = await this.findAllByDepartment(
@@ -38,18 +49,32 @@ export class EmployeesService {
     );
 
     if (!departmentHasManager && !isManager) {
-      return new BadRequestException('Department has no manager');
+      throw new AppError({
+        statusCode: 400,
+        result: 'error',
+        message: 'Department has no manager',
+      });
     }
 
-    const employee = await this.employeeRepository.save(
-      Object.assign(newEmployee, {
-        email,
-        isManager,
-        name,
-        departmentId,
-        onVacation: false,
-      }),
-    );
+    let employee: Employee;
+
+    try {
+      employee = await this.employeeRepository.save(
+        Object.assign(newEmployee, {
+          email,
+          isManager,
+          name,
+          departmentId,
+          onVacation: false,
+        }),
+      );
+    } catch (err) {
+      throw new AppError({
+        statusCode: 400,
+        result: 'error',
+        message: 'Error on create this employee',
+      });
+    }
 
     return new AppResponse({
       result: 'success',
@@ -60,6 +85,14 @@ export class EmployeesService {
 
   async findAll() {
     const employees = await this.employeeRepository.find();
+
+    if (!employees.length) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employees not found',
+      });
+    }
 
     return new AppResponse({
       result: 'success',
@@ -75,6 +108,14 @@ export class EmployeesService {
       },
     });
 
+    if (!employee) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employee not found',
+      });
+    }
+
     return new AppResponse({
       result: 'success',
       message: 'Success on list this employees',
@@ -88,6 +129,14 @@ export class EmployeesService {
         departmentId: departmentId,
       },
     });
+
+    if (!employees.length) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employees not found for this department',
+      });
+    }
 
     return new AppResponse({
       result: 'success',
@@ -103,6 +152,14 @@ export class EmployeesService {
       },
     });
 
+    if (!employee) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employees not found for this email',
+      });
+    }
+
     return new AppResponse({
       result: 'success',
       message: 'Success on list this employee for this email',
@@ -115,23 +172,56 @@ export class EmployeesService {
     { departmentId, email, isManager }: UpdateEmployeeDto,
   ) {
     try {
+      const employee = await this.employeeRepository.findOne({
+        where: {
+          _id: id,
+        },
+      });
+
+      if (!employee) {
+        throw new AppError({
+          result: 'error',
+          statusCode: 400,
+          message: 'Employee not found',
+        });
+      }
+
       await this.employeeRepository.update(id, {
         departmentId,
         email,
         isManager,
       });
     } catch (err) {
-      return new BadRequestException('Error on update this employee');
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Error on update this employee',
+      });
     }
     return { message: 'Success on update' };
   }
 
   async remove(id: string) {
+    const employee = await this.employeeRepository.findOne({
+      where: {
+        _id: id,
+      },
+    });
+
+    if (!employee) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employee not found',
+      });
+    }
+
     try {
       await this.employeeRepository.delete(id);
     } catch (err) {
-      return new AppResponse({
-        result: 'success',
+      return new AppError({
+        result: 'error',
+        statusCode: 400,
         message: 'Error on update this employee',
       });
     }
@@ -146,14 +236,16 @@ export class EmployeesService {
     const { data: employee } = await this.findOne(id);
 
     if (!employee) {
-      return new AppResponse({
+      return new AppError({
+        statusCode: 400,
         result: 'error',
         message: 'Employee does no exists',
       });
     }
 
     if (employee.onVacation && status) {
-      return new AppResponse({
+      return new AppError({
+        statusCode: 400,
         result: 'error',
         message: 'Employee is in vacation',
       });
@@ -164,21 +256,23 @@ export class EmployeesService {
     );
 
     const employeesInWork = departmentsVacations.filter(
-      (row) => !row.onVacation,
+      (row: Employee) => !row.onVacation,
     );
 
     if (employeesInWork.length <= 2 && status) {
-      return new AppResponse({
+      return new AppError({
+        statusCode: 400,
         result: 'error',
         message: 'Exceeded number of employees on vacation',
       });
     }
 
     if (employee.isManager) {
-      const managers = employeesInWork.filter((row) => row.isManager);
+      const managers = employeesInWork.filter((row: Employee) => row.isManager);
 
       if (managers.length <= 1 && status) {
-        return new AppResponse({
+        return new AppError({
+          statusCode: 400,
           result: 'error',
           message: 'Exceeded number of managers on vacation',
         });
@@ -192,7 +286,8 @@ export class EmployeesService {
     } catch (err) {
       console.log({ err });
 
-      return new AppResponse({
+      return new AppError({
+        statusCode: 400,
         result: 'error',
         message: 'Error on update this vacation',
       });

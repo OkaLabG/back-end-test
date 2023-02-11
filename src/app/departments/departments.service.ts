@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AppError } from 'src/helpers/Error';
 import { AppResponse } from 'src/helpers/Response';
 import { Repository } from 'typeorm';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -57,7 +58,10 @@ export class DepartmentsService {
     try {
       await this.departmentRepository.update(id, updateDepartmentDto);
     } catch (err) {
-      return new AppResponse({
+      console.log({ err });
+
+      return new AppError({
+        statusCode: 400,
         result: 'error',
         message: 'Error on update this department',
       });
@@ -73,7 +77,8 @@ export class DepartmentsService {
     try {
       await this.departmentRepository.delete(id);
     } catch (err) {
-      return new AppResponse({
+      return new AppError({
+        statusCode: 400,
         result: 'error',
         message: 'Error on delete this department',
       });
