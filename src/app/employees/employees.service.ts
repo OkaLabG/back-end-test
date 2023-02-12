@@ -7,6 +7,7 @@ import { MongoRepository } from 'typeorm';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Employee } from './entities/employee.entity';
+import { SendMailVacationProducerService } from './jobs/sendMailVacation-producer.service';
 
 @Injectable()
 export class EmployeesService {
@@ -15,6 +16,8 @@ export class EmployeesService {
     private employeeRepository: MongoRepository<Employee>,
     @Inject(DepartmentsService)
     private departmentService: DepartmentsService,
+
+    private sendMailVacationProducerService: SendMailVacationProducerService,
   ) {}
 
   async create({ email, isManager, name, departmentId }: CreateEmployeeDto) {
@@ -311,6 +314,8 @@ export class EmployeesService {
         message: 'Error on update this vacation',
       });
     }
+
+    this.sendMailVacationProducerService.sendMail(updateEmployee);
 
     return new AppResponse({
       result: 'success',
