@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AppError } from 'src/helpers/Error';
-import { AppResponse } from 'src/helpers/Response';
+import { AppError } from '../../helpers/Error';
+import { AppResponse } from '../../helpers/Response';
 import { MongoRepository } from 'typeorm';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
