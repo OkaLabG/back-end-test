@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DepartmentsService } from 'src/app/departments/departments.service';
 import { AppError } from 'src/helpers/Error';
 import { AppResponse } from 'src/helpers/Response';
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Employee } from './entities/employee.entity';
@@ -12,7 +12,7 @@ import { Employee } from './entities/employee.entity';
 export class EmployeesService {
   constructor(
     @InjectRepository(Employee)
-    private employeeRepository: Repository<Employee>,
+    private employeeRepository: MongoRepository<Employee>,
     @Inject(DepartmentsService)
     private departmentService: DepartmentsService,
   ) {}
@@ -44,9 +44,11 @@ export class EmployeesService {
       });
     }
 
-    const { data: departmentHasManager } = await this.findAllByDepartment(
-      departmentId,
-    );
+    let departmentHasManager = null;
+
+    try {
+      departmentHasManager = await this.findAllByDepartment(departmentId);
+    } catch {}
 
     if (!departmentHasManager && !isManager) {
       throw new AppError({
@@ -167,29 +169,43 @@ export class EmployeesService {
     });
   }
 
-  async update(
-    id: string,
-    { departmentId, email, isManager }: UpdateEmployeeDto,
-  ) {
-    try {
-      const employee = await this.employeeRepository.findOne({
-        where: {
-          _id: id,
-        },
+  async update(id: string, { name, departmentId, email }: UpdateEmployeeDto) {
+    const employee = await this.employeeRepository.findOne({
+      where: {
+        _id: id,
+      },
+    });
+
+    if (!employee) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Employee not found',
       });
+    }
 
-      if (!employee) {
-        throw new AppError({
-          result: 'error',
-          statusCode: 400,
-          message: 'Employee not found',
-        });
-      }
+    const { data: departmentExists } = await this.departmentService.findOne(
+      departmentId,
+    );
 
-      await this.employeeRepository.update(id, {
-        departmentId,
-        email,
-        isManager,
+    if (!departmentExists) {
+      throw new AppError({
+        statusCode: 400,
+        result: 'error',
+        message: 'Department does not exists',
+      });
+    }
+
+    const updateEmployee = {
+      ...employee,
+      departmentId: departmentId ?? employee.departmentId,
+      email: email ?? employee.email,
+      name: name ?? employee.name,
+    };
+
+    try {
+      await this.employeeRepository.updateOne(employee, {
+        $set: updateEmployee,
       });
     } catch (err) {
       throw new AppError({
@@ -198,6 +214,7 @@ export class EmployeesService {
         message: 'Error on update this employee',
       });
     }
+
     return { message: 'Success on update' };
   }
 
@@ -217,7 +234,7 @@ export class EmployeesService {
     }
 
     try {
-      await this.employeeRepository.delete(id);
+      await this.employeeRepository.deleteOne(employee);
     } catch (err) {
       return new AppError({
         result: 'error',
@@ -279,9 +296,11 @@ export class EmployeesService {
       }
     }
 
+    const updateEmployee = { ...employee, onVacation: status };
+
     try {
-      await this.employeeRepository.update(id, {
-        onVacation: status,
+      await this.employeeRepository.updateOne(employee, {
+        $set: updateEmployee,
       });
     } catch (err) {
       console.log({ err });
@@ -292,6 +311,7 @@ export class EmployeesService {
         message: 'Error on update this vacation',
       });
     }
+
     return new AppResponse({
       result: 'success',
       message: 'Success on update vacation',

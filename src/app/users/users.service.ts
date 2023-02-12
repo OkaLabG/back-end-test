@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppResponse } from 'src/helpers/Response';
 import { SendMailProducerService } from './jobs/sendMail-producer.service';
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -14,7 +14,7 @@ import { AppError } from 'src/helpers/Error';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private usersRepository: MongoRepository<User>,
     private sendMailProducerService: SendMailProducerService,
     @Inject(EmployeesService)
     private employeesService: EmployeesService,
@@ -157,7 +157,7 @@ export class UsersService {
       departmentId,
     );
 
-    if (employees.length) {
+    if (!employees.length) {
       throw new AppError({
         result: 'error',
         statusCode: 400,
@@ -174,8 +174,24 @@ export class UsersService {
   }
 
   async update(id: string, { email, name }: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({
+      _id: id,
+    });
+
+    if (!user) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User not found',
+      });
+    }
+
+    const userUpdate = { ...user, email, name };
+
     try {
-      await this.usersRepository.update(id, { email, name });
+      await this.usersRepository.updateOne(user, {
+        $set: userUpdate,
+      });
     } catch (err) {
       throw new AppError({
         result: 'error',
@@ -191,8 +207,20 @@ export class UsersService {
   }
 
   async remove(id: string) {
+    const user = await this.usersRepository.findOneBy({
+      _id: id,
+    });
+
+    if (!user) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'User not found',
+      });
+    }
+
     try {
-      await this.usersRepository.delete(id);
+      await this.usersRepository.deleteOne(user);
     } catch (err) {
       throw new AppError({
         result: 'error',

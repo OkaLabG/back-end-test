@@ -16,7 +16,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt'))
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -26,30 +25,31 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
-  @Get('employees/vacation')
+  @Get('employees/vacation/:id')
   @UseGuards(AuthGuard('jwt'))
-  async vacationReport(
-    @Query('department') departmentId: string,
-    @Req() { user },
-  ) {
+  async vacationReport(@Param('id') departmentId: string, @Req() { user }) {
     return this.usersService.vacationReport(user.id, departmentId);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
   async update(@Query('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

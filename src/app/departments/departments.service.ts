@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppError } from 'src/helpers/Error';
 import { AppResponse } from 'src/helpers/Response';
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Department } from './entities/department.entity';
@@ -11,7 +11,7 @@ import { Department } from './entities/department.entity';
 export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
-    private departmentRepository: Repository<Department>,
+    private departmentRepository: MongoRepository<Department>,
   ) {}
 
   async create({ name }: CreateDepartmentDto) {
@@ -33,6 +33,14 @@ export class DepartmentsService {
   async findAll() {
     const departments = await this.departmentRepository.find();
 
+    if (!departments.length) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Departments not found',
+      });
+    }
+
     return new AppResponse({
       result: 'success',
       message: 'Success on list all departments',
@@ -47,6 +55,14 @@ export class DepartmentsService {
       },
     });
 
+    if (!department) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Department not found',
+      });
+    }
+
     return new AppResponse({
       result: 'success',
       message: 'Success on list this department',
@@ -54,12 +70,28 @@ export class DepartmentsService {
     });
   }
 
-  async update(id: string, updateDepartmentDto: UpdateDepartmentDto) {
-    try {
-      await this.departmentRepository.update(id, updateDepartmentDto);
-    } catch (err) {
-      console.log({ err });
+  async update(id: string, { name }: UpdateDepartmentDto) {
+    const department = await this.departmentRepository.findOne({
+      where: {
+        _id: id,
+      },
+    });
 
+    if (!department) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Department not found',
+      });
+    }
+
+    const updateDepartment = { ...department, name };
+
+    try {
+      await this.departmentRepository.updateOne(department, {
+        $set: updateDepartment,
+      });
+    } catch (err) {
       return new AppError({
         statusCode: 400,
         result: 'error',
@@ -74,8 +106,22 @@ export class DepartmentsService {
   }
 
   async remove(id: string) {
+    const department = await this.departmentRepository.findOne({
+      where: {
+        _id: id,
+      },
+    });
+
+    if (!department) {
+      throw new AppError({
+        result: 'error',
+        statusCode: 400,
+        message: 'Department not found',
+      });
+    }
+
     try {
-      await this.departmentRepository.delete(id);
+      await this.departmentRepository.deleteOne(department);
     } catch (err) {
       return new AppError({
         statusCode: 400,
