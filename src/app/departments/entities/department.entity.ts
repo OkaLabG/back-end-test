@@ -12,13 +12,9 @@ export class Department {
   @CreateDateColumn()
   createdAt: Date;
 
-  constructor(department?: Partial<Department>) {
+  constructor() {
     if (!this._id) {
       this._id = uuidv4();
     }
-
-    this._id = department?._id;
-    this.createdAt = department?.createdAt;
-    this.name = department?.name;
   }
 }
